@@ -3,23 +3,33 @@ import sqlite3
 
 feedback_list = []
 
+def gen_feedback(song_name, composer):
+	feedback = "Remembering that " + song_name + " was composed by " + composer + "."
+	return feedback
+
 def add_song(database, conn):
 	file_location = raw_input("What is the file path for the song you want to add? ")
 	song_name = raw_input("What is the name of the song? ")
 	composer = raw_input("Who is the composer of the song? ")
-	
-	database.execute("INSERT INTO songs VALUES ( ?, ?, ? )", (song_name.lower(), composer.lower(), file_location))
-	conn.commit()
-	print(song_name + " successfully inserted")
+
+	try:	
+		database.execute("INSERT INTO songs VALUES ( ?, ?, ? )", (song_name.lower(), composer.lower(), file_location))
+		conn.commit()
+		print(song_name + " successfully inserted")
+	except sqlite3.Error:
+		print(song_name + " insertion was not successful")
 
 def quiz(database):
 	global feedback_list
 	num_correct = 0
 	mixer.init()
-	
-	database.execute("SELECT * FROM songs")
-	all_rows = database.fetchall()
-	
+
+	try:	
+		database.execute("SELECT * FROM songs")
+		all_rows = database.fetchall()
+	except sqlite3.Error:
+		print ("database error... exiting")
+
 	for song_info in all_rows:
 		mixer.music.load(song_info[2])
 		mixer.music.play()
@@ -41,15 +51,15 @@ def quiz(database):
 		elif(composer_name != song_info[1] and song_name == song_info[0]):
 			print("Your answer of composer " + composer_name + " is incorrect. The answer is "+song_info[1] + ". Your answer of song " + song_info[0]+\
 " is correct.")
-			feedback = "Remembering that " + song_info[1] + " composed " + song_info[0]
+			feedback = gen_feedback(song_info[0], song_info[1])
 		elif(composer_name == song_info[1] and song_name != song_info[0]):
 			print("Your answer of composer " + composer_name+" is correct. Your answer of song " + song_info[0]+" is incorrect. The correct answer is "\
 + song_info[0]+".")
-			feedback = "Remembering that " + song_info[1] + " composed " + song_info[0]
+			feedback= gen_feedback(song_info[0], song_info[1])
 		else:
 			print("Your answer of composer " + composer_name+ "is incorrect. The correct answer is " + song_info[1] + ". Your answer of song name "+ \
 song_name[0] + " is incorrect. The correct answer is " + song_info[0]+ ".")
-			feedback = "Remembering that " + song_info[1] + " composed " + song_info[0]
+		feedback = gen_feedback(song_info[0], song_info[1])
 		
 		if(feedback != ""):
 			feedback_list.append(feedback)

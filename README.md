@@ -3,6 +3,10 @@ A quiz application for testing mastery of associating sound to a composer and so
 
 This application was made to study for the listening quizzes in MUSIX1001, An Introduction to Music at Columbia. The application is essentially a sound-enabled flashcard.
 
+REQUIREMENTS:
+	Have Python 2.7 installed. Instructions can be found <a href="https://www.python.org/downloads/"> here </a>.
+	Have pygame for Python 2 installed. Instructions can be found <a href="https://www.pygame.org/wiki/GettingStarted"> here </a>.
+
 To run the appplication type into your terminal: <pre> <code> python main.py </pre> </code>
 
 There program will prompt you for one of three things:
