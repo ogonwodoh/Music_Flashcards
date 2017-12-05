@@ -1,5 +1,7 @@
 from pygame import mixer
+from random import shuffle
 import sqlite3
+import os
 
 feedback_list = []
 
@@ -19,9 +21,7 @@ def add_song(database, conn):
 	except sqlite3.Error:
 		print(song_name + " insertion was not successful")
 
-def quiz(database):
-	global feedback_list
-	num_correct = 0
+def learn(database):
 	mixer.init()
 
 	try:	
@@ -29,8 +29,37 @@ def quiz(database):
 		all_rows = database.fetchall()
 	except sqlite3.Error:
 		print ("database error... exiting")
-
+		return
+	
+	shuffle(all_rows)
 	for song_info in all_rows:
+		mixer.music.load(song_info[2])
+		mixer.music.play()
+		print("Song name: " + song_info[0] + "\nComposer: " + song_info[1])
+		stop = raw_input("Press any key to stop playback. ")
+		mixer.music.stop()
+		cont = raw_input("Press c to move on to the next song, to exit learn press any other key. ")
+		if( cont != 'c'):
+			return
+		os.system('cls' if os.name == 'nt' else 'clear')
+
+def quiz(database):
+	global feedback_list
+	num_correct = 0
+	mixer.init()
+	song_num=1	
+
+	try:	
+		database.execute("SELECT * FROM songs")
+		all_rows = database.fetchall()
+	except sqlite3.Error:
+		print ("database error... exiting")
+		return
+
+	shuffle(all_rows)
+	for song_info in all_rows:
+		print("Playing song " + str(song_num))
+		song_num = song_num + 1
 		mixer.music.load(song_info[2])
 		mixer.music.play()
 		response = raw_input("Press s to stop playback, press any other key to move onto the quiz. ")
@@ -57,13 +86,17 @@ def quiz(database):
 + song_info[0]+".")
 			feedback= gen_feedback(song_info[0], song_info[1])
 		else:
-			print("Your answer of composer " + composer_name+ "is incorrect. The correct answer is " + song_info[1] + ". Your answer of song name "+ \
-song_name[0] + " is incorrect. The correct answer is " + song_info[0]+ ".")
+			print("Your answer of composer " + composer_name+ " is incorrect. The correct answer is " + song_info[1] + ". Your answer of song name "+ \
+song_name + " is incorrect. The correct answer is " + song_info[0]+ ".")
 		feedback = gen_feedback(song_info[0], song_info[1])
 		
 		if(feedback != ""):
 			feedback_list.append(feedback)
 		mixer.music.stop()
+		cont = raw_input("Press c to continue on. Press any other key to stop the quiz. ")
+		if(cont != 'c'):
+			return
+		os.system('cls' if os.name == 'nt' else 'clear')
 
 	print("SCORE: " + str(num_correct) + "/" + str(len(all_rows)))
 	if(len(feedback_list) > 0):
@@ -75,12 +108,14 @@ def main():
 	conn = sqlite3.connect('song_database.sqlite')	
 	database = conn.cursor()
 	conn.execute('CREATE TABLE IF NOT EXISTS songs (song_name text, composer_name text, file_location text)')
-	ans = raw_input("Press s to add a song, press f to quiz, or press q to quit. ")
+	ans = raw_input("Press s to add a song, press f to quiz, press l to learn, or press q to quit. ")
 	while(ans != 'q'):
 		if(ans == 's'):
 			add_song(database,conn)
 		elif (ans == 'f'):
 			quiz(database)
+		elif (ans == 'l'):
+			learn(database)
 		else:
 			print("Please enter a valid input")
 
