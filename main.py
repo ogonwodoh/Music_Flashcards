@@ -82,19 +82,23 @@ def quiz(database):
 " is correct.")
 			feedback = gen_feedback(song_info[0], song_info[1])
 		elif(composer_name == song_info[1] and song_name != song_info[0]):
-			print("Your answer of composer " + composer_name+" is correct. Your answer of song " + song_info[0]+" is incorrect. The correct answer is "\
+			print("Your answer of composer " + composer_name+" is correct. Your answer of song " + song_name+" is incorrect. The correct answer is "\
 + song_info[0]+".")
 			feedback= gen_feedback(song_info[0], song_info[1])
 		else:
 			print("Your answer of composer " + composer_name+ " is incorrect. The correct answer is " + song_info[1] + ". Your answer of song name "+ \
 song_name + " is incorrect. The correct answer is " + song_info[0]+ ".")
-		feedback = gen_feedback(song_info[0], song_info[1])
+			feedback = gen_feedback(song_info[0], song_info[1])
 		
 		if(feedback != ""):
 			feedback_list.append(feedback)
 		mixer.music.stop()
-		cont = raw_input("Press c to continue on. Press any other key to stop the quiz. ")
-		if(cont != 'c'):
+		cont = raw_input("Press c to continue on. Press r to repeat the song. Press any other key to stop the quiz. ")
+		if (cont == 'r'):
+			mixer.music.load(song_info[2])
+			mixer.music.play()
+		if(cont != 'c' and cont !='r'):
+			feedback = []
 			return
 		os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -119,7 +123,7 @@ def main():
 		else:
 			print("Please enter a valid input")
 
-		ans = raw_input("Press s to add a song, press f to quiz, or press q to quit. ")
+		ans = raw_input("Press s to add a song, press f to quiz, press l to learn, or press q to quit. ")
 
 	database.close()
 
